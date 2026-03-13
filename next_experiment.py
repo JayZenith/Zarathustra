@@ -54,9 +54,12 @@ def choose_next_experiment(db_path: Path = DEFAULT_DB_PATH) -> ExperimentIdea | 
         decision = decide_next_action(db_path=db_path)
         recent = db.recent_experiments(limit=12)
         tried = {row["description"] for row in recent}
+        rejected_topics = _recent_rejected_topics(db, recent)
 
         preferred_topics = _topic_priority(decision.topic)
         for topic in preferred_topics:
+            if topic in rejected_topics and topic == decision.topic:
+                continue
             for idea in IDEAS:
                 if idea.topic != topic:
                     continue
@@ -65,6 +68,8 @@ def choose_next_experiment(db_path: Path = DEFAULT_DB_PATH) -> ExperimentIdea | 
                 return idea
 
         for idea in IDEAS:
+            if idea.topic in rejected_topics:
+                continue
             if idea.description not in tried:
                 return idea
         return None
@@ -77,3 +82,32 @@ def _topic_priority(primary: str) -> tuple[str, ...]:
     if primary in order:
         return tuple([primary] + [topic for topic in order if topic != primary])
     return tuple(order)
+
+
+def _recent_rejected_topics(db: ExperimentDB, recent: list[object]) -> set[str]:
+    rejected: set[str] = set()
+    for row in recent[:4]:
+        if row["status"] != "discard":  # type: ignore[index]
+            continue
+        topic = _infer_topic(row["description"])  # type: ignore[index]
+        rejected.add(topic)
+
+    for topic in list(rejected):
+        notes = db.observations_by_topic(topic, limit=3)
+        text = " ".join(row["note"].lower() for row in notes)
+        if any(term in text for term in ("not supported", "worse", "hurt", "avoid")):
+            rejected.add(topic)
+    return rejected
+
+
+def _infer_topic(description: str) -> str:
+    text = description.lower()
+    if any(term in text for term in ("lr", "beta", "momentum", "muon", "adam", "embedding")):
+        return "optimizer"
+    if any(term in text for term in ("warm", "schedule", "decay", "final_lr")):
+        return "schedule"
+    if any(term in text for term in ("wd", "weight decay", "regular")):
+        return "regularization"
+    if any(term in text for term in ("depth", "glu", "relu", "silu", "rope", "window")):
+        return "architecture"
+    return "general"
