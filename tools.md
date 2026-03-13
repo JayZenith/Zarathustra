@@ -90,7 +90,8 @@ python3 cli.py paper-fetch-store --url "https://arxiv.org/abs/2401.00001" --topi
 
 - Use `python3 cli.py decide` after each experiment block.
 - Prefer `python3 agent_cycle.py` as the main entrypoint for the live loop.
-- If decision is `exploit`, stay local around the winning change.
-- If decision is `read_notes`, query stored notes before more edits.
-- If decision is `search_papers`, run a narrow search tied to the bottleneck topic.
+- Treat `decide` and `next-experiment` as heuristics.
+- If decision is `exploit`, staying local is usually right, but not mandatory.
+- If decision is `read_notes`, query stored notes before more edits unless stronger evidence points elsewhere.
+- If decision is `search_papers`, run a narrow search tied to the bottleneck topic or promising frontier.
 - Do not browse papers broadly when local optimization is still working.

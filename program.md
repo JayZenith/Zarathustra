@@ -20,10 +20,11 @@ Focus on:
 2. writing what was learned
 3. avoiding repeated failed ideas
 4. proposing the next experiment from evidence
+5. using your own judgment over any heuristic suggestion in the repo
 
 Paper workflow:
 - First query stored paper notes by topic.
-- Only search for papers when a concrete bottleneck appears or notes are missing.
+- Search for papers when a concrete bottleneck appears, notes are missing, or a promising direction needs deeper grounding.
 - Store every useful paper summary back into the database.
 - Do not browse papers broadly during productive local optimization.
 
@@ -42,3 +43,8 @@ Training workflow:
   - `--description`
   - `--hypothesis`
   - `--lesson`
+
+Decision policy:
+- `rule_engine.py` and `next_experiment.py` provide heuristics, not authority.
+- You may override any suggested action or idea when the evidence supports a better move.
+- The hard requirements are memory, logging, and evidence-based reasoning, not obedience to the heuristics.

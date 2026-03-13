@@ -23,12 +23,12 @@ def main() -> int:
     print("=== Recent Experiments ===")
     print(recent)
     print()
-    print("=== Rule Decision ===")
+    print("=== Rule Decision (Advisory) ===")
     print(f"action: {decision.action}")
     print(f"topic: {decision.topic}")
     print(f"reason: {decision.reason}")
     print()
-    print("=== Next Agent Actions ===")
+    print("=== Next Agent Actions (Advisory) ===")
 
     if decision.action == "exploit":
         print(f"1. Stay local in topic: {decision.topic}")
@@ -52,12 +52,12 @@ def main() -> int:
     else:
         print("1. Explore a new small direction.")
         if idea is not None:
-            print(f"2. Suggested idea: {idea.description}")
+            print(f"2. Suggested fallback idea: {idea.description}")
             print(f"   hypothesis: {idea.hypothesis}")
 
     if idea is not None and decision.action in {"exploit", "explore"}:
-        print(f"Suggested idea: {idea.description}")
-        print(f"Hypothesis: {idea.hypothesis}")
+        print(f"Fallback idea: {idea.description}")
+        print(f"Fallback hypothesis: {idea.hypothesis}")
 
     print()
     print("=== Training Command ===")

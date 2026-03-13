@@ -23,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     log_exp.add_argument("--memory-gb", type=float, required=True)
     log_exp.add_argument("--status", required=True, choices=("keep", "discard", "crash"))
     log_exp.add_argument("--description", required=True)
+    log_exp.add_argument("--signature", default="")
     log_exp.add_argument("--hypothesis", default="")
     log_exp.add_argument("--lesson", default="")
 
@@ -66,6 +67,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ingest = sub.add_parser("ingest-run")
     ingest.add_argument("--description", required=True)
+    ingest.add_argument("--signature", default="")
     ingest.add_argument("--hypothesis", default="")
     ingest.add_argument("--lesson", default="")
     ingest.add_argument("--status", choices=("keep", "discard", "crash"))
@@ -87,6 +89,7 @@ def main() -> int:
                     memory_gb=args.memory_gb,
                     status=args.status,
                     description=args.description,
+                    signature=args.signature,
                     hypothesis=args.hypothesis,
                     lesson=args.lesson,
                 )
@@ -153,6 +156,7 @@ def main() -> int:
         print(
             ingest_run(
                 description=args.description,
+                signature=args.signature,
                 hypothesis=args.hypothesis,
                 lesson=args.lesson,
                 forced_status=args.status,

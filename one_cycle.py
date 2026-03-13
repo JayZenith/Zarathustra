@@ -10,6 +10,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--description", required=True)
     parser.add_argument("--hypothesis", default="")
     parser.add_argument("--lesson", default="")
+    parser.add_argument("--signature", default="")
     parser.add_argument("--timeout", type=int, default=720)
     return parser.parse_args()
 
@@ -21,6 +22,7 @@ def main() -> int:
         description=args.description,
         hypothesis=args.hypothesis,
         lesson=args.lesson if exit_code == 0 else "training run crashed or failed to produce a summary",
+        signature=args.signature,
     )
     print(result)
     return 0 if exit_code == 0 else exit_code

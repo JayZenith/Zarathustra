@@ -12,6 +12,7 @@ class ExperimentIdea:
     description: str
     hypothesis: str
     topic: str
+    signature: str
     keywords: tuple[str, ...]
 
 
@@ -20,36 +21,42 @@ IDEAS = [
         description="slightly lower matrix learning rate",
         hypothesis="A100 may prefer a less aggressive matrix LR because step count is lower than H100.",
         topic="optimizer",
+        signature="param:MATRIX_LR:down",
         keywords=("matrix_lr", "matrix lr", "learning rate", "lr"),
     ),
     ExperimentIdea(
         description="slightly higher warmdown ratio",
         hypothesis="Longer high-LR time before decay may improve short-budget results.",
         topic="schedule",
+        signature="param:WARMDOWN_RATIO:up",
         keywords=("warmdown", "warmdown_ratio", "schedule"),
     ),
     ExperimentIdea(
         description="small weight decay reduction",
         hypothesis="The current run may be slightly over-regularized under a fixed 5-minute budget.",
         topic="regularization",
+        signature="param:WEIGHT_DECAY:down",
         keywords=("weight_decay", "weight decay", "wd", "regularization"),
     ),
     ExperimentIdea(
         description="ablate embedding learning rate",
         hypothesis="Embedding LR may be higher leverage than broader architecture changes at this scale.",
         topic="optimizer",
+        signature="param:EMBEDDING_LR:down",
         keywords=("embedding_lr", "embedding lr", "learning rate", "lr"),
     ),
     ExperimentIdea(
         description="slightly lower final learning rate fraction",
         hypothesis="A gentler ending LR may reduce final-run instability in fixed-time training.",
         topic="schedule",
+        signature="param:FINAL_LR_FRAC:down",
         keywords=("final_lr", "final lr", "schedule", "learning rate", "lr"),
     ),
     ExperimentIdea(
         description="test one simpler activation swap",
         hypothesis="Activation shape may improve optimization without widening the model.",
         topic="architecture",
+        signature="activation:SILU",
         keywords=("activation", "relu", "silu", "swiglu", "glu"),
     ),
 ]
@@ -73,6 +80,8 @@ def choose_next_experiment(db_path: Path = DEFAULT_DB_PATH) -> ExperimentIdea | 
                     continue
                 if idea.description in tried:
                     continue
+                if db.has_signature(idea.signature):
+                    continue
                 if _matches_recent_failure(idea, recent_text):
                     continue
                 return idea
@@ -81,6 +90,8 @@ def choose_next_experiment(db_path: Path = DEFAULT_DB_PATH) -> ExperimentIdea | 
             if idea.topic in rejected_topics:
                 continue
             if idea.description not in tried:
+                if db.has_signature(idea.signature):
+                    continue
                 if _matches_recent_failure(idea, recent_text):
                     continue
                 return idea

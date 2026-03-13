@@ -11,6 +11,7 @@ python3 agent_cycle.py
 ```
 
 2. Decide the next `train.py` edit from the printed actions.
+   Treat them as suggestions, not commands.
 
 3. Make the edit in `train.py`.
 
@@ -53,5 +54,6 @@ This is the narrow runtime glue:
 - Always run `python3 one_cycle.py ...` after a committed edit.
 - Always include a concrete `--lesson` when running `python3 one_cycle.py ...`.
 - After every run, read `AGENT_HANDOFF.md` or run `python3 agent_cycle.py`.
-- Do not browse papers unless the rule engine says `read_notes` or `search_papers`.
+- Use paper tools when bottlenecked, missing context, or deepening a promising direction.
 - Keep edits small unless the evidence clearly supports a larger move.
+- Override the rule engine when the evidence contradicts it.

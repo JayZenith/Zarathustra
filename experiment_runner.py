@@ -41,6 +41,7 @@ def ingest_run(
     hypothesis: str = "",
     lesson: str = "",
     forced_status: str | None = None,
+    signature: str = "",
 ) -> LoggedRun:
     commit_hash = _git_short_hash()
     log_text = RUN_LOG_PATH.read_text(encoding="utf-8", errors="replace") if RUN_LOG_PATH.exists() else ""
@@ -65,6 +66,7 @@ def ingest_run(
                 memory_gb=memory_gb,
                 status=status,
                 description=description,
+                signature=signature or _infer_signature(description, hypothesis),
                 hypothesis=hypothesis,
                 lesson=lesson,
             )
@@ -131,6 +133,47 @@ def _git_short_hash() -> str:
         text=True,
     )
     return completed.stdout.strip() or "nogit"
+
+
+def _infer_signature(description: str, hypothesis: str) -> str:
+    text = f"{description} {hypothesis}".lower()
+    if "matrix_lr" in text or "matrix lr" in text:
+        if any(term in text for term in ("lower", "less", "decrease", "reduce")):
+            return "param:MATRIX_LR:down"
+        if any(term in text for term in ("higher", "increase", "raise")):
+            return "param:MATRIX_LR:up"
+        return "param:MATRIX_LR"
+    if "warmdown" in text:
+        if any(term in text for term in ("higher", "increase", "longer", "more")):
+            return "param:WARMDOWN_RATIO:up"
+        if any(term in text for term in ("lower", "decrease", "reduce", "shorter", "less")):
+            return "param:WARMDOWN_RATIO:down"
+        return "param:WARMDOWN_RATIO"
+    if "weight_decay" in text or "weight decay" in text or "wd" in text:
+        if any(term in text for term in ("lower", "decrease", "reduce", "less")):
+            return "param:WEIGHT_DECAY:down"
+        if any(term in text for term in ("higher", "increase", "raise", "more")):
+            return "param:WEIGHT_DECAY:up"
+        return "param:WEIGHT_DECAY"
+    if "embedding_lr" in text or "embedding lr" in text:
+        if any(term in text for term in ("lower", "decrease", "reduce", "ablate", "less")):
+            return "param:EMBEDDING_LR:down"
+        if any(term in text for term in ("higher", "increase", "raise", "more")):
+            return "param:EMBEDDING_LR:up"
+        return "param:EMBEDDING_LR"
+    if "final_lr" in text or "final lr" in text:
+        if any(term in text for term in ("lower", "decrease", "reduce", "less")):
+            return "param:FINAL_LR_FRAC:down"
+        if any(term in text for term in ("higher", "increase", "raise", "more")):
+            return "param:FINAL_LR_FRAC:up"
+        return "param:FINAL_LR_FRAC"
+    if "silu" in text or "relu" in text or "swiglu" in text:
+        if "silu" in text:
+            return "activation:SILU"
+        if "swiglu" in text:
+            return "activation:SWIGLU"
+        return "activation"
+    return ""
 
 
 def _update_runtime_state(
