@@ -7,7 +7,6 @@ Read:
 - `prepare.py`
 - `train.py`
 - `tools.md`
-- `runtime.md`
 - `program.md`
 
 Goal:
@@ -29,7 +28,6 @@ Paper workflow:
 
 All tool usage should go through `python3 cli.py ...`.
 Use `python3 agent_cycle.py` at the start of each research cycle.
-If needed, use `python3 agent_runtime.py ...` to invoke repeated external agent cycles.
 
 Training workflow:
 - `prepare.py` is fixed. Do not modify it.

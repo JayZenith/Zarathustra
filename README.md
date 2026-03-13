@@ -23,6 +23,7 @@ And it adds:
 - `tools.md` — exact CLI tools and rules
 - `cli.py` — entrypoint for research memory and paper tools
 - `experiment_db.py` — SQLite schema and access layer
+- `agent_cycle.py` — compact view of recent evidence
 
 ## Scope
 

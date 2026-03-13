@@ -2,28 +2,12 @@
 
 Use these commands from `/home/jay-zenith/Desktop/zarathustra`.
 
-## Agent glue
+## Research state
 
 Print the current research state:
 
 ```bash
 python3 agent_cycle.py
-python3 agent_brief.py
-python3 loop_controller.py show
-python3 loop_controller.py refresh
-python3 prompt_builder.py
-```
-
-Run repeated external agent cycles:
-
-```bash
-python3 agent_runtime.py --agent-cmd 'claude -p "$(cat {prompt_file})"' --cycles 3
-```
-
-Or with another CLI:
-
-```bash
-python3 agent_runtime.py --agent-cmd 'codex exec -C {repo_root} "$(cat {prompt_file})"' --cycles 3
 ```
 
 ## Training run
@@ -37,8 +21,6 @@ python3 one_cycle.py --description "batch reduction test" --hypothesis "more ste
 This automatically updates:
 - `experiments.db`
 - `results.tsv`
-- `runtime_state.json`
-- `AGENT_HANDOFF.md`
 
 If training was run separately and only the log needs to be recorded:
 

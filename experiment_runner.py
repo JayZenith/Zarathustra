@@ -5,9 +5,7 @@ from pathlib import Path
 import subprocess
 
 from experiment_db import ExperimentDB, ExperimentRecord
-from handoff import write_handoff
 from run_watcher import RunSummary, parse_run_log
-from state_store import RuntimeState, load_state, save_state
 
 
 REPO_ROOT = Path(__file__).resolve().parent
@@ -78,13 +76,6 @@ def ingest_run(
         memory_gb=memory_gb,
         status=status,
         description=description,
-    )
-
-    _update_runtime_state(
-        commit_hash=commit_hash,
-        status=status,
-        description=description,
-        hypothesis=hypothesis,
     )
     return LoggedRun(
         commit_hash=commit_hash,
@@ -169,22 +160,3 @@ def _infer_signature(description: str, hypothesis: str) -> str:
             return "activation:SWIGLU"
         return "activation"
     return ""
-
-
-def _update_runtime_state(
-    *,
-    commit_hash: str,
-    status: str,
-    description: str,
-    hypothesis: str,
-) -> None:
-    old = load_state()
-    state = RuntimeState(
-        cycle_count=old.cycle_count + 1,
-        last_commit=commit_hash,
-        last_status=status,
-        last_description=description,
-        last_hypothesis=hypothesis,
-    )
-    save_state(state)
-    write_handoff(state=state)
