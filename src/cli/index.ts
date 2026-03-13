@@ -5,6 +5,8 @@ import { runCommand } from "./commands/run.js";
 import { statusCommand } from "./commands/status.js";
 import { tuiCommand } from "./commands/tui.js";
 import { dbCommand } from "./commands/db.js";
+import { paperSearchCommand } from "./commands/paper_search.js";
+import { paperFetchCommand } from "./commands/paper_fetch.js";
 
 async function main(): Promise<void> {
   const [, , command, ...args] = process.argv;
@@ -29,6 +31,14 @@ async function main(): Promise<void> {
       requireArg(args[0], "db requires a SQL string");
       dbCommand(repo, args[0]!);
       break;
+    case "paper-search":
+      requireArg(args[0], "paper-search requires a query");
+      await paperSearchCommand(args.join(" "));
+      break;
+    case "paper-fetch":
+      requireArg(args[0], "paper-fetch requires an arXiv URL or id");
+      await paperFetchCommand(args[0]!);
+      break;
     default:
       printHelp();
   }
@@ -50,7 +60,9 @@ function printHelp(): void {
       "  run <target-name> [max-cycles]",
       "  status",
       "  tui",
-      "  db \"<sql>\""
+      "  db \"<sql>\"",
+      "  paper-search <query>",
+      "  paper-fetch <url-or-id>"
     ].join("\n") + "\n",
   );
 }
