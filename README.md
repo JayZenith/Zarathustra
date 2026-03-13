@@ -1,33 +1,38 @@
 # zarathustra
 
-`zarathustra` is a minimal autonomous research loop helper for
-`/home/jay-zenith/Desktop/autoresearch`.
+`zarathustra` is an `autoresearch`-style training repo with stricter research
+memory.
 
-It is not a full agent platform. It adds only the missing research-rigor
-pieces:
+It directly contains the training target:
+
+- `prepare.py` — fixed data prep and evaluation
+- `train.py` — mutable training file
+
+And it adds:
 
 - `experiments.db` for durable experiment memory
-- structured observations and hypotheses
+- structured observations and lessons
 - run log parsing
 - next-experiment suggestion
-- targeted paper notes
+- targeted paper search/fetch/summarization
 
-## Files
+## Main files
 
+- `prepare.py` — fixed training prep/eval
+- `train.py` — the file the agent edits
+- `program.md` — main agent instructions
+- `tools.md` — exact CLI tools and rules
+- `cli.py` — entrypoint for research memory and paper tools
 - `experiment_db.py` — SQLite schema and access layer
-- `research_memory.py` — structured notes on what was learned
-- `run_watcher.py` — parse training logs and summaries
-- `next_experiment.py` — choose the next experiment idea from evidence
-- `paper_notes.py` — store and retrieve paper notes by topic
-- `program.md` — instructions for the agent using this repo
+- `rule_engine.py` — exploit vs explore vs paper lookup
 
 ## Scope
 
 This project is intentionally narrow:
 
-- no UI
-- no provider abstraction
-- no SSH layer
-- no generic agent runtime
+- one training target
+- one mutable training file
+- one experiment database
+- targeted paper use only when needed
 
-It is meant to sit next to `autoresearch`, not replace it.
+No UI, no provider abstraction, no generic agent platform.

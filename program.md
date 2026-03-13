@@ -1,9 +1,11 @@
 # zarathustra
 
-Use this repo alongside `/home/jay-zenith/Desktop/autoresearch`.
+Use this repo as the training research repo.
 
 Read:
 - `README.md`
+- `prepare.py`
+- `train.py`
 - `tools.md`
 - `program.md`
 
@@ -11,8 +13,6 @@ Goal:
 - keep durable experiment memory
 - record explicit hypotheses and lessons
 - choose better next experiments from evidence
-
-Do not turn this into a general autonomous agent platform.
 
 Focus on:
 1. recording every experiment cleanly
@@ -27,3 +27,10 @@ Paper workflow:
 - Do not browse papers broadly during productive local optimization.
 
 All tool usage should go through `python3 cli.py ...`.
+
+Training workflow:
+- `prepare.py` is fixed. Do not modify it.
+- `train.py` is the mutable surface.
+- Run training with `uv run train.py > run.log 2>&1`.
+- Parse results from `run.log`.
+- Log experiment outcomes into `experiments.db`.
