@@ -8,6 +8,7 @@ Print the current research state and next actions:
 
 ```bash
 python3 agent_cycle.py
+python3 agent_brief.py
 ```
 
 ## Training run

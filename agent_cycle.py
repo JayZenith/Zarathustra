@@ -55,12 +55,19 @@ def main() -> int:
             print(f"2. Suggested idea: {idea.description}")
             print(f"   hypothesis: {idea.hypothesis}")
 
+    if idea is not None and decision.action in {"exploit", "explore"}:
+        print(f"Suggested idea: {idea.description}")
+        print(f"Hypothesis: {idea.hypothesis}")
+
     print()
     print("=== Training Command ===")
     print(
         'python3 one_cycle.py --description "<what changed>" '
         '--hypothesis "<why this might help>"'
     )
+    print()
+    print("=== Compact Brief Command ===")
+    print("python3 agent_brief.py")
     return 0
 
 
