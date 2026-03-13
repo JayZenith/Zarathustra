@@ -13,7 +13,6 @@ And it adds:
 - `experiments.db` for durable experiment memory
 - structured observations and lessons
 - run log parsing
-- next-experiment suggestion
 - targeted paper search/fetch/summarization
 
 ## Main files
@@ -24,7 +23,7 @@ And it adds:
 - `tools.md` — exact CLI tools and rules
 - `cli.py` — entrypoint for research memory and paper tools
 - `experiment_db.py` — SQLite schema and access layer
-- `rule_engine.py` — exploit vs explore vs paper lookup
+- `agent_cycle.py` — compact view of recent evidence
 
 ## Scope
 

@@ -5,10 +5,7 @@ from pathlib import Path
 import subprocess
 
 from experiment_db import ExperimentDB, ExperimentRecord
-from handoff import write_handoff
-from rule_engine import RuleDecision, decide_next_action
 from run_watcher import RunSummary, parse_run_log
-from state_store import RuntimeState, load_state, save_state
 
 
 REPO_ROOT = Path(__file__).resolve().parent
@@ -22,7 +19,6 @@ class LoggedRun:
     status: str
     summary: RunSummary | None
     experiment_id: int
-    rule_decision: RuleDecision
 
 
 def run_training(timeout_s: int = 720) -> int:
@@ -41,6 +37,7 @@ def ingest_run(
     hypothesis: str = "",
     lesson: str = "",
     forced_status: str | None = None,
+    signature: str = "",
 ) -> LoggedRun:
     commit_hash = _git_short_hash()
     log_text = RUN_LOG_PATH.read_text(encoding="utf-8", errors="replace") if RUN_LOG_PATH.exists() else ""
@@ -65,6 +62,7 @@ def ingest_run(
                 memory_gb=memory_gb,
                 status=status,
                 description=description,
+                signature=signature or _infer_signature(description, hypothesis),
                 hypothesis=hypothesis,
                 lesson=lesson,
             )
@@ -79,21 +77,11 @@ def ingest_run(
         status=status,
         description=description,
     )
-
-    decision = decide_next_action()
-    _update_runtime_state(
-        commit_hash=commit_hash,
-        status=status,
-        description=description,
-        hypothesis=hypothesis,
-        decision=decision,
-    )
     return LoggedRun(
         commit_hash=commit_hash,
         status=status,
         summary=summary,
         experiment_id=experiment_id,
-        rule_decision=decision,
     )
 
 
@@ -133,24 +121,42 @@ def _git_short_hash() -> str:
     return completed.stdout.strip() or "nogit"
 
 
-def _update_runtime_state(
-    *,
-    commit_hash: str,
-    status: str,
-    description: str,
-    hypothesis: str,
-    decision: RuleDecision,
-) -> None:
-    old = load_state()
-    state = RuntimeState(
-        cycle_count=old.cycle_count + 1,
-        last_commit=commit_hash,
-        last_status=status,
-        last_description=description,
-        last_hypothesis=hypothesis,
-        last_decision_action=decision.action,
-        last_decision_topic=decision.topic,
-        last_decision_reason=decision.reason,
-    )
-    save_state(state)
-    write_handoff(state=state)
+def _infer_signature(description: str, hypothesis: str) -> str:
+    text = f"{description} {hypothesis}".lower()
+    if "matrix_lr" in text or "matrix lr" in text:
+        if any(term in text for term in ("lower", "less", "decrease", "reduce")):
+            return "param:MATRIX_LR:down"
+        if any(term in text for term in ("higher", "increase", "raise")):
+            return "param:MATRIX_LR:up"
+        return "param:MATRIX_LR"
+    if "warmdown" in text:
+        if any(term in text for term in ("higher", "increase", "longer", "more")):
+            return "param:WARMDOWN_RATIO:up"
+        if any(term in text for term in ("lower", "decrease", "reduce", "shorter", "less")):
+            return "param:WARMDOWN_RATIO:down"
+        return "param:WARMDOWN_RATIO"
+    if "weight_decay" in text or "weight decay" in text or "wd" in text:
+        if any(term in text for term in ("lower", "decrease", "reduce", "less")):
+            return "param:WEIGHT_DECAY:down"
+        if any(term in text for term in ("higher", "increase", "raise", "more")):
+            return "param:WEIGHT_DECAY:up"
+        return "param:WEIGHT_DECAY"
+    if "embedding_lr" in text or "embedding lr" in text:
+        if any(term in text for term in ("lower", "decrease", "reduce", "ablate", "less")):
+            return "param:EMBEDDING_LR:down"
+        if any(term in text for term in ("higher", "increase", "raise", "more")):
+            return "param:EMBEDDING_LR:up"
+        return "param:EMBEDDING_LR"
+    if "final_lr" in text or "final lr" in text:
+        if any(term in text for term in ("lower", "decrease", "reduce", "less")):
+            return "param:FINAL_LR_FRAC:down"
+        if any(term in text for term in ("higher", "increase", "raise", "more")):
+            return "param:FINAL_LR_FRAC:up"
+        return "param:FINAL_LR_FRAC"
+    if "silu" in text or "relu" in text or "swiglu" in text:
+        if "silu" in text:
+            return "activation:SILU"
+        if "swiglu" in text:
+            return "activation:SWIGLU"
+        return "activation"
+    return ""

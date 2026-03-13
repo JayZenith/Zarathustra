@@ -15,6 +15,7 @@ class ExperimentRecord:
     memory_gb: float
     status: str
     description: str
+    signature: str = ""
     hypothesis: str = ""
     lesson: str = ""
 
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS experiments (
     memory_gb REAL NOT NULL,
     status TEXT NOT NULL,
     description TEXT NOT NULL,
+    signature TEXT NOT NULL DEFAULT '',
     hypothesis TEXT NOT NULL DEFAULT '',
     lesson TEXT NOT NULL DEFAULT ''
 );
@@ -60,7 +62,15 @@ class ExperimentDB:
         self.conn = sqlite3.connect(self.path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
         self.conn.commit()
+
+    def _migrate(self) -> None:
+        columns = {row["name"] for row in self.conn.execute("PRAGMA table_info(experiments)")}
+        if "signature" not in columns:
+            self.conn.execute(
+                "ALTER TABLE experiments ADD COLUMN signature TEXT NOT NULL DEFAULT ''"
+            )
 
     def close(self) -> None:
         self.conn.close()
@@ -69,8 +79,8 @@ class ExperimentDB:
         cursor = self.conn.execute(
             """
             INSERT INTO experiments (
-                commit_hash, val_bpb, memory_gb, status, description, hypothesis, lesson
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                commit_hash, val_bpb, memory_gb, status, description, signature, hypothesis, lesson
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.commit_hash,
@@ -78,6 +88,7 @@ class ExperimentDB:
                 record.memory_gb,
                 record.status,
                 record.description,
+                record.signature,
                 record.hypothesis,
                 record.lesson,
             ),
@@ -145,6 +156,13 @@ class ExperimentDB:
         cursor = self.conn.execute(
             "SELECT 1 FROM experiments WHERE description = ? LIMIT 1",
             (description,),
+        )
+        return cursor.fetchone() is not None
+
+    def has_signature(self, signature: str) -> bool:
+        cursor = self.conn.execute(
+            "SELECT 1 FROM experiments WHERE signature = ? LIMIT 1",
+            (signature,),
         )
         return cursor.fetchone() is not None
 

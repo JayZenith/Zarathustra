@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import argparse
 
-from next_experiment import choose_next_experiment
+from experiment_db import ExperimentDB
 from research_memory import summarize_recent
-from rule_engine import decide_next_action
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Print the next zarathustra agent cycle.")
+    parser = argparse.ArgumentParser(description="Print the current zarathustra research state.")
     parser.add_argument("--limit", type=int, default=8, help="How many recent experiments to summarize.")
     return parser
 
@@ -17,57 +16,43 @@ def main() -> int:
     args = build_parser().parse_args()
 
     recent = summarize_recent(limit=args.limit)
-    decision = decide_next_action()
-    idea = choose_next_experiment()
+    db = ExperimentDB()
+    try:
+        best = db.best_experiment()
+    finally:
+        db.close()
 
     print("=== Recent Experiments ===")
     print(recent)
     print()
-    print("=== Rule Decision ===")
-    print(f"action: {decision.action}")
-    print(f"topic: {decision.topic}")
-    print(f"reason: {decision.reason}")
-    print()
-    print("=== Next Agent Actions ===")
-
-    if decision.action == "exploit":
-        print(f"1. Stay local in topic: {decision.topic}")
-        print("2. Make one small ablation or refinement around the current winning direction.")
-        if idea is not None:
-            print(f"3. Candidate fallback idea: {idea.description}")
-            print(f"   hypothesis: {idea.hypothesis}")
-    elif decision.action == "read_notes":
-        print(f"1. Read stored paper notes for topic: {decision.topic}")
-        print(f"   command: python3 cli.py paper-notes --topic {decision.topic}")
-        print("2. Use those notes to propose one concrete train.py edit.")
-    elif decision.action == "search_papers":
-        print(f"1. Search papers for topic: {decision.topic}")
-        print(
-            "   command: python3 cli.py paper-search-store "
-            f'--query "{decision.topic} transformer short training runs" --topic {decision.topic}'
-        )
-        print("2. Read the stored notes.")
-        print(f"   command: python3 cli.py paper-notes --topic {decision.topic}")
-        print("3. Use one paper-backed idea to modify train.py.")
+    print("=== Current Best ===")
+    if best is None:
+        print("No experiments logged yet.")
     else:
-        print("1. Explore a new small direction.")
-        if idea is not None:
-            print(f"2. Suggested idea: {idea.description}")
-            print(f"   hypothesis: {idea.hypothesis}")
-
-    if idea is not None and decision.action in {"exploit", "explore"}:
-        print(f"Suggested idea: {idea.description}")
-        print(f"Hypothesis: {idea.hypothesis}")
+        print(f'val_bpb: {float(best["val_bpb"]):.6f}')
+        print(f'status: {best["status"]}')
+        print(f'description: {best["description"]}')
+        if best["lesson"]:
+            print(f'lesson: {best["lesson"]}')
+    print()
+    print("=== Research Reminders ===")
+    print("1. Use recent experiments, lessons, and paper notes as evidence.")
+    print("2. Choose the next edit yourself; the repo does not prescribe it.")
+    print("3. Record a concrete lesson every run.")
+    print("4. Query paper notes or search papers when evidence is weak or bottlenecked.")
 
     print()
     print("=== Training Command ===")
     print(
         'python3 one_cycle.py --description "<what changed>" '
-        '--hypothesis "<why this might help>"'
+        '--hypothesis "<why this might help>" '
+        '--lesson "<what was learned>"'
     )
     print()
-    print("=== Compact Brief Command ===")
-    print("python3 agent_brief.py")
+    print("=== Useful Commands ===")
+    print("python3 cli.py recent")
+    print("python3 cli.py paper-notes --topic <topic>")
+    print('python3 cli.py paper-search-store --query "<query>" --topic <topic>')
     return 0
 
 

@@ -2,28 +2,12 @@
 
 Use these commands from `/home/jay-zenith/Desktop/zarathustra`.
 
-## Agent glue
+## Research state
 
-Print the current research state and next actions:
+Print the current research state:
 
 ```bash
 python3 agent_cycle.py
-python3 agent_brief.py
-python3 loop_controller.py show
-python3 loop_controller.py refresh
-python3 prompt_builder.py
-```
-
-Run repeated external agent cycles:
-
-```bash
-python3 agent_runtime.py --agent-cmd 'claude -p "$(cat {prompt_file})"' --cycles 3
-```
-
-Or with another CLI:
-
-```bash
-python3 agent_runtime.py --agent-cmd 'codex exec -C {repo_root} "$(cat {prompt_file})"' --cycles 3
 ```
 
 ## Training run
@@ -31,19 +15,17 @@ python3 agent_runtime.py --agent-cmd 'codex exec -C {repo_root} "$(cat {prompt_f
 Run one actual training cycle:
 
 ```bash
-python3 one_cycle.py --description "batch reduction test" --hypothesis "more steps help on A100"
+python3 one_cycle.py --description "batch reduction test" --hypothesis "more steps help on A100" --lesson "If this wins, more steps matter more than larger batch throughput on A100."
 ```
 
 This automatically updates:
 - `experiments.db`
 - `results.tsv`
-- `runtime_state.json`
-- `AGENT_HANDOFF.md`
 
 If training was run separately and only the log needs to be recorded:
 
 ```bash
-python3 cli.py ingest-run --description "batch reduction test" --hypothesis "more steps help on A100"
+python3 cli.py ingest-run --description "batch reduction test" --hypothesis "more steps help on A100" --lesson "Batch reduction test completed."
 ```
 
 ## Experiment memory
@@ -54,8 +36,6 @@ python3 cli.py log-experiment --commit abc1234 --val-bpb 1.041706 --memory-gb 30
 
 ```bash
 python3 cli.py recent
-python3 cli.py next-experiment
-python3 cli.py decide
 ```
 
 ## Research notes
@@ -88,9 +68,7 @@ python3 cli.py paper-fetch-store --url "https://arxiv.org/abs/2401.00001" --topi
 
 ## Rules
 
-- Use `python3 cli.py decide` after each experiment block.
 - Prefer `python3 agent_cycle.py` as the main entrypoint for the live loop.
-- If decision is `exploit`, stay local around the winning change.
-- If decision is `read_notes`, query stored notes before more edits.
-- If decision is `search_papers`, run a narrow search tied to the bottleneck topic.
+- Use recent experiments, lessons, and paper notes as evidence.
+- Choose the next edit yourself.
 - Do not browse papers broadly when local optimization is still working.
