@@ -12,6 +12,7 @@ worktrees/
 results/
 queue/
 run.log
+experiments.db
 AGENT_HANDOFF.md
 AGENT_PROMPT.md
 agent_runtime.log
