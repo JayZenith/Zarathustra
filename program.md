@@ -12,7 +12,7 @@ Read:
 Goal:
 - keep durable experiment memory
 - record explicit hypotheses and lessons
-- support better next experiments from evidence
+- support better research from evidence
 
 Focus on:
 1. recording every experiment cleanly

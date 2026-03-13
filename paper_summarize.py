@@ -18,7 +18,7 @@ def summarize_paper(*, title: str, abstract: str, topic: str) -> PaperSummary:
     method = sentences[1] if len(sentences) > 1 else "Method not clearly extracted."
     takeaway = _best_takeaway(sentences, topic)
     experiment_hint = (
-        f"Test one small {topic} change suggested by this paper before attempting larger rewrites."
+        f"Test one small {topic} change motivated by this paper before attempting larger rewrites."
     )
     tags = tuple(dict.fromkeys([topic, *_infer_tags(title, abstract)]))
     return PaperSummary(
